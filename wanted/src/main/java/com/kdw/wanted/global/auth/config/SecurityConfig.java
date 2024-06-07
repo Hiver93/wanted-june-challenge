@@ -48,14 +48,15 @@ public class SecurityConfig {
 			.authorizeHttpRequests(
 					authorizeRequests -> 
 						authorizeRequests
-							.requestMatchers("/user/signin", "/user/signup").permitAll()
+							.requestMatchers("/","/accounts/signin", "/accounts/signup").permitAll()
+							.requestMatchers("/accounts/signin").permitAll()
 							.requestMatchers(HttpMethod.GET, "/products").permitAll()
 							.requestMatchers("/err").permitAll()
 							.anyRequest().permitAll()
-					)
-			.addFilterBefore(
-					new JwtAuthenticationFilter(jwtTokenProvider), 
-					UsernamePasswordAuthenticationFilter.class);
+					);
+//			.addFilterBefore(
+//					new JwtAuthenticationFilter(jwtTokenProvider), 
+//					UsernamePasswordAuthenticationFilter.class);
 			
 		
 		
