@@ -4,7 +4,9 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.global.auth.dto.JwtToken;
 
 import io.jsonwebtoken.Claims;
@@ -32,25 +35,30 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class JwtTokenProvider {
 	private final Key key;
+	private final Long EXPIRATION;
 	
-	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey){
+	public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, @Value("${jwt.access_expiration}") Long expiration){
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.key = Keys.hmacShaKeyFor(keyBytes);
+		this.EXPIRATION = expiration;
 	}
 	
 	public JwtToken genrateToken(Authentication authentication) {
 		String authorites = authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.joining(","));
+		Account account = (Account)authentication.getPrincipal();
+		Map<String, Object> claims = Map.of("id", account.getId(),"username", account.getUsername());
+		
 		long now = new Date().getTime();
-		Date accessTokenExpiresln = new Date(now + 86400000);
+		Date accessTokenExpiresln = new Date(now + EXPIRATION);
 		String accessToken = Jwts.builder()
 				.setSubject(authentication.getName())
 				.claim("auth", authorites)
+				.addClaims(claims)
 				.setExpiration(accessTokenExpiresln)
 				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
-		
 		String refreshToken = Jwts.builder()
 				.setExpiration(accessTokenExpiresln)
 				.signWith(key, SignatureAlgorithm.HS256)

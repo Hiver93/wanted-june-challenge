@@ -29,6 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	private UserDetails createUserDetail(Account account) {
 		return Account.builder()
+				.id(account.getId())
 				.username(account.getUsername())
 				.password(bCryptPasswordEncoder.encode(account.getPassword()))
 				.roles(account.getRoles())
