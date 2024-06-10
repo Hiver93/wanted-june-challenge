@@ -52,11 +52,11 @@ public class SecurityConfig {
 							.requestMatchers("/accounts/signin").permitAll()
 							.requestMatchers(HttpMethod.GET, "/products").permitAll()
 							.requestMatchers("/err").permitAll()
-							.anyRequest().permitAll()
-					);
-//			.addFilterBefore(
-//					new JwtAuthenticationFilter(jwtTokenProvider), 
-//					UsernamePasswordAuthenticationFilter.class);
+							.anyRequest().authenticated()
+					)
+			.addFilterBefore(
+					new JwtAuthenticationFilter(jwtTokenProvider), 
+					UsernamePasswordAuthenticationFilter.class);
 			
 		
 		
