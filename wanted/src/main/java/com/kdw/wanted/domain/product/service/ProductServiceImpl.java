@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
+import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
 import com.kdw.wanted.domain.product.dto.response.ProductResponseDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;

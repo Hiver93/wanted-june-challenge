@@ -26,11 +26,13 @@ import com.kdw.wanted.global.util.BaseResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping(path = "/products")
 @CrossOrigin(allowedHeaders = "*", originPatterns = "*")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 	
 	private final ProductService productService;
@@ -95,8 +97,12 @@ public class ProductController {
 	
 	// 거래 승인(판매자)
 	@PutMapping("/transactions/approve")
-	public ResponseEntity<BaseResponseBody> approveTransaction(){
-		return null;
+	public ResponseEntity<BaseResponseBody> approveTransaction(@RequestBody @Valid ProductTransactionRequestDto.Approve productTransactionRequestDto, HttpServletRequest httpRequest){
+		return new ResponseEntity<BaseResponseBody>(
+					BaseResponseBody.of(productTransactionService.approveTransaction(productTransactionRequestDto, jwtService.getId(httpRequest)),
+					"success"),
+					HttpStatus.ACCEPTED
+				);
 	}
 	
 	// 거래 확정(구매자)

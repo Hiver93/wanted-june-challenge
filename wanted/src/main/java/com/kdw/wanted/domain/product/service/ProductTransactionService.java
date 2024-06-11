@@ -11,4 +11,6 @@ public interface ProductTransactionService {
 	public String makeTransaction(ProductTransactionRequestDto.Make productTransactionRequestDto, UUID consumerID);
 	
 	public List<ProductTransactionResponseDto.Element> getTransactins(UUID accountId);
+	
+	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId);
 }
