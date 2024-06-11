@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 public enum ProductTransactionState {
-	SALE("판매중",1), RESERVED("예약중",2), COMPLETE("판매완료",3), CANCELED("취소", 4);
+	RESERVED("예약중",1), ACCEPTED("판매승인",2), COMPLETE("판매완료",3), CANCELED("취소", 4);
 	
 	private String desc;
 	private int code;

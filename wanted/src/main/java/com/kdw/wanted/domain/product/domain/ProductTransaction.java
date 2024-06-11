@@ -39,7 +39,7 @@ public class ProductTransaction {
 	
 	@Convert(converter = ProductTransactionStateConverter.class)
 	@Builder.Default
-	ProductTransactionState state = ProductTransactionState.SALE;
+	ProductTransactionState state = ProductTransactionState.RESERVED;
 
 	@CreatedDate
 	LocalDateTime createdAt;
