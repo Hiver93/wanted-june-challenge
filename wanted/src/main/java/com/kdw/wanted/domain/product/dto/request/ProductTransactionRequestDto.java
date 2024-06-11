@@ -15,6 +15,6 @@ public class ProductTransactionRequestDto {
 	@Data
 	public static class Approve{
 		@NotNull
-		Long productId;
+		Long productTransactionId;
 	}
 }
