@@ -10,6 +10,7 @@ import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
 import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
+import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto.Confirm;
 import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
@@ -70,6 +71,18 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 			throw new RuntimeException();
 		}
 		productTransaction.setState(ProductTransactionState.ACCEPTED);
+		
+		return "success";
+	}
+
+	@Override
+	@Transactional
+	public String confirmTransaction(Confirm productTransactionRequestDto, UUID consumerId) {
+		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new RuntimeException());
+		if(!productTransaction.getConsumer().getId().equals(consumerId)) {
+			throw new RuntimeException();
+		}
+		productTransaction.setState(ProductTransactionState.COMPLETE);
 		
 		return "success";
 	}

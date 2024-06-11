@@ -17,4 +17,10 @@ public class ProductTransactionRequestDto {
 		@NotNull
 		Long productTransactionId;
 	}
+	
+	@Data
+	public static class Confirm{
+		@NotNull
+		Long productTransactionId;
+	}
 }

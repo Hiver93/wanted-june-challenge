@@ -107,7 +107,11 @@ public class ProductController {
 	
 	// 거래 확정(구매자)
 	@PutMapping("/transactions/confirm")
-	public ResponseEntity<BaseResponseBody> confirmTransaction(){
-		return null;
+	public ResponseEntity<BaseResponseBody> confirmTransaction(@RequestBody @Valid ProductTransactionRequestDto.Confirm productTransactionRequestDto, HttpServletRequest httpRequest){
+		return new ResponseEntity<BaseResponseBody>(
+				BaseResponseBody.of(productTransactionService.confirmTransaction(productTransactionRequestDto, jwtService.getId(httpRequest)),
+				"success"),
+				HttpStatus.ACCEPTED
+			);
 	}
 }
