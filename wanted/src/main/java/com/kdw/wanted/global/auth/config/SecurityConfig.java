@@ -51,7 +51,7 @@ public class SecurityConfig {
 							.requestMatchers("/","/accounts/signin", "/accounts/signup").permitAll()
 							.requestMatchers("/accounts/signin").permitAll()
 							.requestMatchers(HttpMethod.GET, "/products").permitAll()
-							.requestMatchers("/err").permitAll()
+							.requestMatchers("/error").permitAll()
 							.anyRequest().authenticated()
 					)
 			.addFilterBefore(
