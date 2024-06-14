@@ -72,7 +72,7 @@ public class SecurityConfig {
 						authorizeRequests
 							.requestMatchers("/","/accounts/signin", "/accounts/signup").permitAll()
 							.requestMatchers("/accounts/signin").permitAll()
-							.requestMatchers(HttpMethod.GET, "/products").permitAll()
+							.requestMatchers(HttpMethod.GET, "/products/**").permitAll()
 							.requestMatchers("/error").permitAll()
 							.anyRequest().authenticated()
 					)
