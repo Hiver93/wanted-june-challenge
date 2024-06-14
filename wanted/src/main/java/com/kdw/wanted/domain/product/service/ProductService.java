@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.dto.response.ProductResponseDto;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface ProductService {
 	public String createProduct(Product product);
 	
@@ -13,5 +15,5 @@ public interface ProductService {
 	
 	public Product modifyProduct(Product product);
 	
-	public ProductResponseDto.Detail getProductDetail(Long productId, UUID consumerId);
+	public ProductResponseDto.Detail getProductDetail(Long productId, HttpServletRequest httpRequest);
 }

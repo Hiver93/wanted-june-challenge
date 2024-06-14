@@ -68,7 +68,7 @@ public class ProductController {
 	public ResponseEntity<BaseResponseBody> getProduct(@PathVariable("productId") Long productId, HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
 					BaseResponseBody.of(
-							productService.getProductDetail(productId, jwtService.getId(httpRequest))
+							productService.getProductDetail(productId, httpRequest)
 							,"success")
 						,HttpStatus.OK
 				);

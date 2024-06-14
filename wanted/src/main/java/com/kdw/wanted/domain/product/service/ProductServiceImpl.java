@@ -1,17 +1,20 @@
 package com.kdw.wanted.domain.product.service;
 
 import java.util.List;
-import java.util.UUID;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
-import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
 import com.kdw.wanted.domain.product.dto.response.ProductResponseDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
+import com.kdw.wanted.global.auth.service.JwtService;
+import com.kdw.wanted.global.error.ErrorCode;
+import com.kdw.wanted.global.error.exception.ProductException;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
 
 	private final ProductRepository productRepository;
 	private final ProductTransactionRepository productTransactionRepository;
+	private final JwtService jwtService;
 	
 	@Override
 	public String createProduct(Product product) {
@@ -35,16 +39,19 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Product modifyProduct(Product product) {
-		Product lastProduct = productRepository.findById(product.getId()).orElseThrow(()->new RuntimeException("해당 상품 없음"));
+		Product lastProduct = productRepository.findById(product.getId()).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
 		lastProduct.setName(product.getName());
 		lastProduct.setPrice(product.getPrice());
 		return lastProduct;
 	}
 
 	@Override
-	public ProductResponseDto.Detail getProductDetail(Long productId, UUID consumerId) {
-		Product product = productRepository.findById(productId).orElseThrow(()->new RuntimeException());
-		ProductTransaction productTransaction = productTransactionRepository.findByConsumerId(consumerId).orElse(null);
+	public ProductResponseDto.Detail getProductDetail(Long productId, HttpServletRequest httpRequest) {
+		Product product = productRepository.findById(productId).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
+		ProductTransaction productTransaction = null; 
+		if(null != httpRequest.getHeader(HttpHeaders.AUTHORIZATION)){
+				productTransaction = productTransactionRepository.findByConsumerId(jwtService.getId(httpRequest)).orElse(null);
+		}
 		return ProductResponseDto.Detail.fromEntity(product, productTransaction);
 	}
 
