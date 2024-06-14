@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.global.auth.dto.JwtToken;
+import com.kdw.wanted.global.error.ErrorCode;
+import com.kdw.wanted.global.error.exception.AuthException;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -44,7 +46,7 @@ public class JwtTokenProvider {
 	}
 	
 	public JwtToken genrateToken(Authentication authentication) {
-		String authorites = authentication.getAuthorities().stream()
+		String authorities = authentication.getAuthorities().stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.joining(","));
 		Account account = (Account)authentication.getPrincipal();
@@ -54,7 +56,7 @@ public class JwtTokenProvider {
 		Date accessTokenExpiresln = new Date(now + EXPIRATION);
 		String accessToken = Jwts.builder()
 				.setSubject(authentication.getName())
-				.claim("auth", authorites)
+				.claim("auth", authorities)
 				.addClaims(claims)
 				.setExpiration(accessTokenExpiresln)
 				.signWith(key, SignatureAlgorithm.HS256)
@@ -91,15 +93,18 @@ public class JwtTokenProvider {
 				.parseClaimsJws(token);
 			return true;
 		} catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
+			log.info("INVALID_JWT_TOKEN", e);
+			throw new AuthException(ErrorCode.INVALID_JWT_TOKEN);
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
+        	log.info("Expired JWT Token", e);
+        	throw new AuthException(ErrorCode.EXPIRED_JWT_TOKEN);
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT Token", e);
+            throw new AuthException(ErrorCode.UNSUPPORTED_JWT_TOKEN);
         } catch (IllegalArgumentException e) {
             log.info("JWT claims string is empty.", e);
+            throw new AuthException(ErrorCode.JWT_CLAIMS_EMPTY);
         }
-        return false;
 	}
 
 	private Claims parseClaims(String accessToken) {

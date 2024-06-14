@@ -2,11 +2,11 @@ package com.kdw.wanted.global.error.exception;
 
 import com.kdw.wanted.global.error.ErrorCode;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AccountException extends RuntimeException{
 	private final ErrorCode errorCode;
 }

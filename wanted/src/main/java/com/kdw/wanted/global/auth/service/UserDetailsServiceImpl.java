@@ -1,6 +1,5 @@
 package com.kdw.wanted.global.auth.service;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +21,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Account account = accountRepository.findByUsername(username).orElseThrow(()->new RuntimeException("loaduserbyusername err"));
+		Account account = accountRepository.findByUsername(username).orElseThrow(()->new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
 		
 		return createUserDetail(account);
 	}
