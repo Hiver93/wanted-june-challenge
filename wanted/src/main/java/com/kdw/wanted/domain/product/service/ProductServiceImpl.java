@@ -15,6 +15,7 @@ import com.kdw.wanted.global.error.ErrorCode;
 import com.kdw.wanted.global.error.exception.ProductException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +31,12 @@ public class ProductServiceImpl implements ProductService {
 		productRepository.save(product);
 		return "success";
 	}
+	
+	@Override
+	public Product getProduct(Long productId) {
+		Product product = productRepository.findById(productId).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
+		return product;
+	}
 
 	@Override
 	public List<Product> getProductList() {
@@ -38,6 +45,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional
 	public Product modifyProduct(Product product) {
 		Product lastProduct = productRepository.findById(product.getId()).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
 		lastProduct.setName(product.getName());

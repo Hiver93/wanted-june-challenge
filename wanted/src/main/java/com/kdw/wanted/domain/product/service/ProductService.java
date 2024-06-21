@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface ProductService {
 	public String createProduct(Product product);
 	
+	public Product getProduct(Long productId);
+	
 	public List<Product> getProductList();
 	
 	public Product modifyProduct(Product product);
