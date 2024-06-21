@@ -15,4 +15,6 @@ public interface ProductTransactionService {
 	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId);
 	
 	public String confirmTransaction(ProductTransactionRequestDto.Confirm productTransactionRequestDto, UUID consumerId);
+	
+	public ProductTransaction getProductTransactionForProduct(Long productId, UUID consumerId);
 }

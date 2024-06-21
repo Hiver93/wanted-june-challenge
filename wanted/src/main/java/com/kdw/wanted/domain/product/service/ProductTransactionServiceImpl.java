@@ -3,6 +3,7 @@ package com.kdw.wanted.domain.product.service;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
 import com.kdw.wanted.domain.account.domain.Account;
@@ -14,10 +15,14 @@ import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto.Co
 import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
+import com.kdw.wanted.global.auth.service.JwtService;
+import com.kdw.wanted.global.error.ErrorCode;
+import com.kdw.wanted.global.error.exception.AccountException;
+import com.kdw.wanted.global.error.exception.ProductException;
+import com.kdw.wanted.global.error.exception.ProductTransactionException;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -27,18 +32,19 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	
 	private final ProductTransactionRepository productTransactionRepository;
 	private final ProductRepository productRepository;
+	private final JwtService jwtService;
 	
 	@Override
 	@Transactional
 	public String makeTransaction(ProductTransactionRequestDto.Make productTransactionRequestDto, UUID consumerId) {
-		Product product = productRepository.findById(productTransactionRequestDto.getProductId()).orElseThrow();
+		Product product = productRepository.findById(productTransactionRequestDto.getProductId()).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
 		if(product.getAccount().getId().equals(consumerId)){
-			throw new RuntimeException();
+			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
 		}
-		if(product.getRemaning() < 1) {
-			throw new RuntimeException();
+		if(product.getRemaining() < 1) {
+			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
 		}
-		product.setRemaning(product.getRemaning()-1);
+		product.setRemaining(product.getRemaining()-1);
 		ProductTransaction productTransaction = ProductTransaction.builder()
 													.price(product.getPrice())
 													.product(product)
@@ -66,9 +72,12 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	@Override
 	@Transactional
 	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId) {
-		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new RuntimeException());
+		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
 		if(!productTransaction.getProduct().getAccount().getId().equals(producerId)) {
-			throw new RuntimeException();
+			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
+		}
+		if(!productTransaction.getState().equals(ProductTransactionState.RESERVED)) {
+			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
 		}
 		productTransaction.setState(ProductTransactionState.ACCEPTED);
 		
@@ -78,13 +87,22 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	@Override
 	@Transactional
 	public String confirmTransaction(Confirm productTransactionRequestDto, UUID consumerId) {
-		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new RuntimeException());
+		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
 		if(!productTransaction.getConsumer().getId().equals(consumerId)) {
-			throw new RuntimeException();
+			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
+		}
+		if(!productTransaction.getState().equals(ProductTransactionState.ACCEPTED)) {
+			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
 		}
 		productTransaction.setState(ProductTransactionState.COMPLETE);
 		
 		return "success";
+	}
+
+	@Override
+	public ProductTransaction getProductTransactionForProduct(Long productId, UUID consumerId) {
+		ProductTransaction productTransaction = productTransactionRepository.findByProductIdAndConsumerId(productId, consumerId).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
+		return productTransaction;
 	}
 	
 }
