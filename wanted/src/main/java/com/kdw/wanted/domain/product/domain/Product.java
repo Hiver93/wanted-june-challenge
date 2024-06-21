@@ -22,6 +22,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,7 +49,7 @@ public class Product {
 	Long quantity;
 	
 	@Column
-	Long remaning;
+	Long remaining;
 	
 	@Convert(converter = ProductStateConverter.class)
 	@Builder.Default
@@ -63,6 +64,15 @@ public class Product {
 	@ManyToOne
 	@JoinColumn(name = "account_id")
 	Account account;
+	
+	@Version
+	Integer version;
+	
+	
+	public void decreaseRemaining() {
+		this.remaining -= 1;
+	}
+	
 	
 	@OneToMany(mappedBy = "product", targetEntity = ProductTransaction.class)
     private List<ProductTransaction> productTransactions = new ArrayList<>();
