@@ -16,6 +16,4 @@ public interface ProductService {
 	public List<Product> getProductList();
 	
 	public Product modifyProduct(Product product);
-	
-	public ProductResponseDto.Detail getProductDetail(Long productId, HttpServletRequest httpRequest);
 }

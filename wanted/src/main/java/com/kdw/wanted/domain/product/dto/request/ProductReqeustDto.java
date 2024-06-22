@@ -29,7 +29,7 @@ public class ProductReqeustDto {
 					.name(this.name)
 					.price(this.price)
 					.quantity(quantity)
-					.remaning(quantity)
+					.remaining(quantity)
 					.build();
 		}
 		

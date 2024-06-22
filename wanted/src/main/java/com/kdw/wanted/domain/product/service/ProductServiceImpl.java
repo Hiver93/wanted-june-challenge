@@ -53,14 +53,4 @@ public class ProductServiceImpl implements ProductService {
 		return lastProduct;
 	}
 
-	@Override
-	public ProductResponseDto.Detail getProductDetail(Long productId, HttpServletRequest httpRequest) {
-		Product product = productRepository.findById(productId).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
-		ProductTransaction productTransaction = null; 
-		if(null != httpRequest.getHeader(HttpHeaders.AUTHORIZATION)){
-				productTransaction = productTransactionRepository.findByConsumerId(jwtService.getId(httpRequest)).orElse(null);
-		}
-		return ProductResponseDto.Detail.fromEntity(product, productTransaction);
-	}
-
 }

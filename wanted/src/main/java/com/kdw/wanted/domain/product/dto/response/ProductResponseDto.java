@@ -48,7 +48,7 @@ public class ProductResponseDto {
 					.price(product.getPrice())
 					.state(product.getState())
 					.quantity(product.getQuantity())
-					.remaining(product.getRemaning())
+					.remaining(product.getRemaining())
 					.createdAt(product.getCreatedAt())
 					.updatedAt(product.getUpdatedAt())
 					.build();
@@ -105,7 +105,7 @@ public class ProductResponseDto {
 									.createdAt(transaction.getCreatedAt())
 									.updatedAt(transaction.getUpdatedAt())
 									.build())
-					.remaining(product.getRemaning())
+					.remaining(product.getRemaining())
 					.createdAt(product.getCreatedAt())
 					.updatedAt(product.getUpdatedAt())
 					.build();
