@@ -19,6 +19,7 @@ import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.dto.request.ProductReqeustDto;
 import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
 import com.kdw.wanted.domain.product.dto.response.ProductResponseDto;
+import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
 import com.kdw.wanted.domain.product.service.ProductService;
 import com.kdw.wanted.domain.product.service.ProductTransactionService;
 import com.kdw.wanted.global.auth.service.JwtService;
@@ -100,7 +101,9 @@ public class ProductController {
 	@GetMapping("/transactions")
 	public ResponseEntity<BaseResponseBody> getTransactions(HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-				BaseResponseBody.of(productTransactionService.getTransactins(jwtService.getId(httpRequest)),
+				BaseResponseBody.of(productTransactionService.getTransactins(jwtService.getId(httpRequest))
+															.stream().map(
+																	transaction->ProductTransactionResponseDto.Element.fromEntity(transaction)),
 				"success"),
 				HttpStatus.OK
 				);

@@ -57,14 +57,14 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	}
 
 	@Override
-	public List<ProductTransactionResponseDto.Element> getTransactins(UUID accountId) {
+	public List<ProductTransaction> getTransactins(UUID accountId) {
 		List<ProductTransaction> productTransactions = productTransactionRepository.findAllByConsumerId(accountId);
 		productRepository.findAllByAccountId(accountId).stream().forEach(
 					p-> p.getProductTransactions().stream().forEach(
 								t -> {productTransactions.add(t);}
 							)
 				);
-		return productTransactions.stream().map(ProductTransactionResponseDto.Element::fromEntity).toList();
+		return productTransactions;
 	}
 	
 
