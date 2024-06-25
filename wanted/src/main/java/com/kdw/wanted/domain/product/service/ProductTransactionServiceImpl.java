@@ -57,7 +57,7 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	}
 
 	@Override
-	public List<ProductTransaction> getTransactins(UUID accountId) {
+	public List<ProductTransaction> getTransactions(UUID accountId) {
 		List<ProductTransaction> productTransactions = productTransactionRepository.findAllByConsumerId(accountId);
 		productRepository.findAllByAccountId(accountId).stream().forEach(
 					p-> p.getProductTransactions().stream().forEach(

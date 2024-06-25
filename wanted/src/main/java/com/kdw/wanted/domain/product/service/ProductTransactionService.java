@@ -10,7 +10,7 @@ import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
 public interface ProductTransactionService {
 	public String makeTransaction(Long productId, UUID consumerID);
 	
-	public List<ProductTransaction> getTransactins(UUID accountId);
+	public List<ProductTransaction> getTransactions(UUID accountId);
 	
 	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId);
 	
