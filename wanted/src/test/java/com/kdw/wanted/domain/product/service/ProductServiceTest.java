@@ -66,7 +66,7 @@ public class ProductServiceTest {
 	//createProduct	
 	@Test
 	@DisplayName("상품이 저장된다.")
-	public void createProduct() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+	public void createProduct() {
 		// given
 		Product product = Product.builder()
 							.account(accountList.get(0))
@@ -167,7 +167,6 @@ public class ProductServiceTest {
 
 	@Test
 	@DisplayName("상품 id에 해당하는 상품이 없다면 PRODUCT_NOT_FOUND 예외발생")
-	
 	public void createProductNoAccount() {
 		// given
 		Long productId = testProductRepository.getLastId() + 1;

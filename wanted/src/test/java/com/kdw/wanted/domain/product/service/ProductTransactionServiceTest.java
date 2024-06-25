@@ -23,7 +23,6 @@ import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.domain.enums.ProductState;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
-import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
 import com.kdw.wanted.global.error.ErrorCode;
@@ -201,6 +200,91 @@ public class ProductTransactionServiceTest {
 		// then
 		product = productRepository.findAll().get(0);
 		assertEquals(0, product.getRemaining());
+	}
+	
+	// getTransactions
+	@Test
+	@DisplayName("거래요청 내역 리스트를 조회한다. (판매자)")
+	public void getTransactionsProvider() {
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.RESERVED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		
+		// when
+		List<ProductTransaction> result = productTransactionService.getTransactions(provider.getId());
+		
+		// then
+		List<ProductTransaction> expected = List.of(ProductTransaction.builder()
+				.product(product)
+				.consumer(consumerList.get(0))
+				.price(product.getPrice())
+				.state(ProductTransactionState.RESERVED)
+				.build());
+		
+		assertEquals(expected.size(),result.size());
+		for(int i = 0; i < expected.size(); ++i) {
+			assertEquals(expected.get(i).getProduct().getId(), result.get(i).getProduct().getId());
+			assertEquals(expected.get(i).getConsumer().getId(), result.get(i).getConsumer().getId());
+			assertEquals(expected.get(i).getPrice(), result.get(i).getPrice());
+			assertEquals(expected.get(i).getState(), result.get(i).getState());
+		}
+	}
+	
+	@Test
+	@DisplayName("거래요청 내역 리스트를 조회한다. (구매자)")
+	public void getTransactionsConsumer() {
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.RESERVED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		
+		// when
+		List<ProductTransaction> result = productTransactionService.getTransactions(consumer.getId());
+		
+		// then
+		List<ProductTransaction> expected = List.of(ProductTransaction.builder()
+				.product(product)
+				.consumer(consumerList.get(0))
+				.price(product.getPrice())
+				.state(ProductTransactionState.RESERVED)
+				.build());
+		
+		assertEquals(expected.size(),result.size());
+		for(int i = 0; i < expected.size(); ++i) {
+			assertEquals(expected.get(i).getProduct().getId(), result.get(i).getProduct().getId());
+			assertEquals(expected.get(i).getConsumer().getId(), result.get(i).getConsumer().getId());
+			assertEquals(expected.get(i).getPrice(), result.get(i).getPrice());
+			assertEquals(expected.get(i).getState(), result.get(i).getState());
+		}
 	}
 
 }
