@@ -8,7 +8,7 @@ import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
 import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
 
 public interface ProductTransactionService {
-	public String makeTransaction(ProductTransactionRequestDto.Make productTransactionRequestDto, UUID consumerID);
+	public String makeTransaction(Long productId, UUID consumerID);
 	
 	public List<ProductTransactionResponseDto.Element> getTransactins(UUID accountId);
 	

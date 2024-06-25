@@ -90,7 +90,7 @@ public class ProductController {
 	@PostMapping("/transactions")
 	public ResponseEntity<BaseResponseBody> createTransaction(@RequestBody @Valid ProductTransactionRequestDto.Make productTransactionRequestDto, HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-				BaseResponseBody.of(productTransactionService.makeTransaction(productTransactionRequestDto, jwtService.getId(httpRequest)),
+				BaseResponseBody.of(productTransactionService.makeTransaction(productTransactionRequestDto.getProductId(), jwtService.getId(httpRequest)),
 				"success"),
 				HttpStatus.CREATED
 				);

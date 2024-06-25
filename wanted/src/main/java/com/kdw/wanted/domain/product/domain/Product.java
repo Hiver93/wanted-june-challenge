@@ -66,7 +66,8 @@ public class Product {
 	Account account;
 	
 	@Version
-	Integer version;
+	@Builder.Default
+	Integer version = 0;
 	
 	
 	public void decreaseRemaining() {
