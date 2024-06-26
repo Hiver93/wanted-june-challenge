@@ -23,6 +23,7 @@ import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.domain.enums.ProductState;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
+import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
 import com.kdw.wanted.global.error.ErrorCode;
@@ -285,6 +286,118 @@ public class ProductTransactionServiceTest {
 			assertEquals(expected.get(i).getPrice(), result.get(i).getPrice());
 			assertEquals(expected.get(i).getState(), result.get(i).getState());
 		}
+	}
+	
+	// approveTransaction
+	@Test
+	@DisplayName("거래 요청을 승인한다.")
+	public void approveTransaction() {
+		
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.RESERVED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		
+		// when
+		String result = productTransactionService.approveTransaction(productTransaction.getId(), provider.getId());
+		
+		// then
+		ProductTransaction expected = ProductTransaction.builder()
+											.state(ProductTransactionState.ACCEPTED)
+											.build();
+		ProductTransaction modified = productTransactionRepository.findById(productTransaction.getId()).get();
+		assertEquals("success",result);
+		assertEquals(expected.getState(), modified.getState());		
+	}
+	
+	@Test
+	@DisplayName("판매자가 아닌 사용자가 요청을 승인하면 UNAUTHORIZED_ACCOUNT 예외 발생")
+	public void approveTransactionUnauthorizedAccount() {
+
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.RESERVED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		Long productTransactionId = productTransaction.getId();
+		
+		// when
+		// then
+		Exception e = assertThrows(
+				AccountException.class, ()->productTransactionService.approveTransaction(productTransactionId, consumer.getId()));
+		assertEquals(ErrorCode.UNAUTHORIZED_ACCOUNT, ((AccountException)e).getErrorCode());
+	}
+	
+	@Test
+	@DisplayName("해당하는 거래 내역이 없는 경우 TRANSACTION_NOT_FOUND 예외 발생")
+	public void approveTranactionTransactionNotFound() {
+		
+		// given
+		Long productTransactionId = 0l;
+		UUID providerId = provider.getId();
+		
+		// when
+		// then
+		ProductTransactionException e = assertThrows(
+				ProductTransactionException.class, ()->productTransactionService.approveTransaction(productTransactionId, providerId));
+		assertEquals(ErrorCode.TRANSACTION_NOT_FOUND, e.getErrorCode());
+	}
+	
+	@Test
+	@DisplayName("거래 승락할 수 있는 상태가 아니면 TRANSACTION_NOT_ACCEPTABLE 예외 발생")
+	public void approveTransactionTransactionNotAcceptable() {
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.ACCEPTED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		Long productTransactionId = productTransaction.getId();
+		
+		// when
+		// then
+		ProductTransactionException e = assertThrows(
+				ProductTransactionException.class, ()->productTransactionService.approveTransaction(productTransactionId, provider.getId()));
+		assertEquals(ErrorCode.TRANSACTION_NOT_ACCEPTABLE, e.getErrorCode());
 	}
 
 }
