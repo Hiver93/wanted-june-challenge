@@ -57,6 +57,7 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	}
 
 	@Override
+	@Transactional
 	public List<ProductTransaction> getTransactions(UUID accountId) {
 		List<ProductTransaction> productTransactions = productTransactionRepository.findAllByConsumerId(accountId);
 		productRepository.findAllByAccountId(accountId).stream().forEach(
@@ -71,9 +72,9 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 
 	@Override
 	@Transactional
-	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId) {
-		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
-		if(!productTransaction.getProduct().getAccount().getId().equals(producerId)) {
+	public String approveTransaction(Long productTransactionId, UUID providerId) {
+		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionId).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
+		if(!productTransaction.getProduct().getAccount().getId().equals(providerId)) {
 			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
 		}
 		if(!productTransaction.getState().equals(ProductTransactionState.RESERVED)) {

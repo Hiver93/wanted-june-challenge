@@ -101,7 +101,7 @@ public class ProductController {
 	@GetMapping("/transactions")
 	public ResponseEntity<BaseResponseBody> getTransactions(HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-				BaseResponseBody.of(productTransactionService.getTransactins(jwtService.getId(httpRequest))
+				BaseResponseBody.of(productTransactionService.getTransactions(jwtService.getId(httpRequest))
 															.stream().map(
 																	transaction->ProductTransactionResponseDto.Element.fromEntity(transaction)),
 				"success"),
@@ -114,7 +114,7 @@ public class ProductController {
 	@PutMapping("/transactions/approve")
 	public ResponseEntity<BaseResponseBody> approveTransaction(@RequestBody @Valid ProductTransactionRequestDto.Approve productTransactionRequestDto, HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-					BaseResponseBody.of(productTransactionService.approveTransaction(productTransactionRequestDto, jwtService.getId(httpRequest)),
+					BaseResponseBody.of(productTransactionService.approveTransaction(productTransactionRequestDto.getProductTransactionId(), jwtService.getId(httpRequest)),
 					"success"),
 					HttpStatus.ACCEPTED
 				);

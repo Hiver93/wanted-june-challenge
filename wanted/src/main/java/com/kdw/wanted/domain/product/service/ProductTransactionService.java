@@ -12,7 +12,7 @@ public interface ProductTransactionService {
 	
 	public List<ProductTransaction> getTransactions(UUID accountId);
 	
-	public String approveTransaction(ProductTransactionRequestDto.Approve productTransactionRequestDto, UUID producerId);
+	public String approveTransaction(Long productTrnasactionId, UUID providerId);
 	
 	public String confirmTransaction(ProductTransactionRequestDto.Confirm productTransactionRequestDto, UUID consumerId);
 	
