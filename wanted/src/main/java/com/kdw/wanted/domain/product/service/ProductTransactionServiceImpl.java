@@ -87,8 +87,8 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 
 	@Override
 	@Transactional
-	public String confirmTransaction(Confirm productTransactionRequestDto, UUID consumerId) {
-		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionRequestDto.getProductTransactionId()).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
+	public String confirmTransaction(Long productTransactionId, UUID consumerId) {
+		ProductTransaction productTransaction = productTransactionRepository.findById(productTransactionId).orElseThrow(()->new ProductTransactionException(ErrorCode.TRANSACTION_NOT_FOUND));
 		if(!productTransaction.getConsumer().getId().equals(consumerId)) {
 			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
 		}

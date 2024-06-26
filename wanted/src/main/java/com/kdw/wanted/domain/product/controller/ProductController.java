@@ -124,7 +124,7 @@ public class ProductController {
 	@PutMapping("/transactions/confirm")
 	public ResponseEntity<BaseResponseBody> confirmTransaction(@RequestBody @Valid ProductTransactionRequestDto.Confirm productTransactionRequestDto, HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-				BaseResponseBody.of(productTransactionService.confirmTransaction(productTransactionRequestDto, jwtService.getId(httpRequest)),
+				BaseResponseBody.of(productTransactionService.confirmTransaction(productTransactionRequestDto.getProductTransactionId(), jwtService.getId(httpRequest)),
 				"success"),
 				HttpStatus.ACCEPTED
 			);
