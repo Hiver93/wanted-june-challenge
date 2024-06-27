@@ -522,6 +522,46 @@ public class ProductTransactionServiceTest {
 	}
 	
 	@Test
+	@DisplayName("마지막거래까지 모두 확정 된경우 상품의 상태를 COMPLETE로 상태 변경")
+	public void confirmTransactionProductStateToComplete() {
+		
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(1l)
+				.remaining(1l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(
+							product
+				);
+		Account consumer = consumerList.get(0);
+		
+		ProductTransaction transaction = ProductTransaction.builder()
+								.product(product)
+								.consumer(consumer)
+								.state(ProductTransactionState.ACCEPTED)
+								.build();
+		transaction = productTransactionRepository.save(transaction);
+		
+		// when
+		String result = productTransactionService.confirmTransaction(transaction.getId(), consumer.getId());
+		
+		// then		
+		assertEquals("success", result);
+		ProductTransaction saved = productTransactionRepository.findAll().get(0);
+		Product modifiedProduct = productRepository.findById(product.getId()).get(); 
+		Product expected = Product.builder()
+									.state(ProductState.COMPLETE)
+									.build();
+		
+		assertEquals(expected.getState(), modifiedProduct.getState());
+	}
+	
+	
+	@Test
 	@DisplayName("해당하는 거래 내역이 없다면 TRANSACTION_NOT_FOUND 예외 발생")
 	public void confirmTransactionTransactionNotFound() {
 		
