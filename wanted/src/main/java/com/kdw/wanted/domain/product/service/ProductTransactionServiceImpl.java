@@ -43,6 +43,9 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
 		}
 		product.decreaseRemaining();
+		if(product.getRemaining() < 1) {
+			product.stateToReserved();
+		}
 		ProductTransaction productTransaction = ProductTransaction.builder()
 													.price(product.getPrice())
 													.product(product)
