@@ -3,6 +3,7 @@ package com.kdw.wanted.domain.product.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -23,7 +24,7 @@ import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.domain.enums.ProductState;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
-import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
+import com.kdw.wanted.domain.product.dto.service.response.ProductTransactionServiceResponse.Transactions;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
 import com.kdw.wanted.global.error.ErrorCode;
@@ -227,22 +228,32 @@ public class ProductTransactionServiceTest {
 		productTransaction = productTransactionRepository.save(productTransaction);
 		
 		// when
-		List<ProductTransaction> result = productTransactionService.getTransactions(provider.getId());
+		Transactions result = productTransactionService.getTransactions(provider.getId());
 		
 		// then
-		List<ProductTransaction> expected = List.of(ProductTransaction.builder()
-				.product(product)
-				.consumer(consumerList.get(0))
-				.price(product.getPrice())
-				.state(ProductTransactionState.RESERVED)
-				.build());
+		Transactions expected = Transactions.builder()
+												.complete(new ArrayList<>())
+												.inProgress(List.of(ProductTransaction.builder()
+														.product(product)
+														.consumer(consumerList.get(0))
+														.price(product.getPrice())
+														.state(ProductTransactionState.RESERVED)
+														.build()))
+												.build();
 		
-		assertEquals(expected.size(),result.size());
-		for(int i = 0; i < expected.size(); ++i) {
-			assertEquals(expected.get(i).getProduct().getId(), result.get(i).getProduct().getId());
-			assertEquals(expected.get(i).getConsumer().getId(), result.get(i).getConsumer().getId());
-			assertEquals(expected.get(i).getPrice(), result.get(i).getPrice());
-			assertEquals(expected.get(i).getState(), result.get(i).getState());
+		assertEquals(expected.getComplete().size(),result.getComplete().size());
+		assertEquals(expected.getInProgress().size(), result.getInProgress().size());
+		for(int i = 0; i < expected.getComplete().size(); ++i) {
+			assertEquals(expected.getComplete().get(i).getProduct().getId(), result.getComplete().get(i).getProduct().getId());
+			assertEquals(expected.getComplete().get(i).getConsumer().getId(), result.getComplete().get(i).getConsumer().getId());
+			assertEquals(expected.getComplete().get(i).getPrice(), result.getComplete().get(i).getPrice());
+			assertEquals(expected.getComplete().get(i).getState(), result.getComplete().get(i).getState());
+		}
+		for(int i = 0; i < expected.getInProgress().size(); ++i) {
+			assertEquals(expected.getInProgress().get(i).getProduct().getId(), result.getInProgress().get(i).getProduct().getId());
+			assertEquals(expected.getInProgress().get(i).getConsumer().getId(), result.getInProgress().get(i).getConsumer().getId());
+			assertEquals(expected.getInProgress().get(i).getPrice(), result.getInProgress().get(i).getPrice());
+			assertEquals(expected.getInProgress().get(i).getState(), result.getInProgress().get(i).getState());
 		}
 	}
 	
@@ -269,22 +280,26 @@ public class ProductTransactionServiceTest {
 		productTransaction = productTransactionRepository.save(productTransaction);
 		
 		// when
-		List<ProductTransaction> result = productTransactionService.getTransactions(consumer.getId());
+		Transactions result = productTransactionService.getTransactions(consumer.getId());
 		
 		// then
-		List<ProductTransaction> expected = List.of(ProductTransaction.builder()
-				.product(product)
-				.consumer(consumerList.get(0))
-				.price(product.getPrice())
-				.state(ProductTransactionState.RESERVED)
-				.build());
+		Transactions expected = Transactions.builder()
+												.complete(new ArrayList<>())
+												.inProgress(List.of(ProductTransaction.builder()
+														.product(product)
+														.consumer(consumerList.get(0))
+														.price(product.getPrice())
+														.state(ProductTransactionState.RESERVED)
+														.build()))
+												.build();
 		
-		assertEquals(expected.size(),result.size());
-		for(int i = 0; i < expected.size(); ++i) {
-			assertEquals(expected.get(i).getProduct().getId(), result.get(i).getProduct().getId());
-			assertEquals(expected.get(i).getConsumer().getId(), result.get(i).getConsumer().getId());
-			assertEquals(expected.get(i).getPrice(), result.get(i).getPrice());
-			assertEquals(expected.get(i).getState(), result.get(i).getState());
+		assertEquals(expected.getComplete().size(),result.getComplete().size());
+		assertEquals(expected.getInProgress().size(), result.getInProgress().size());
+		for(int i = 0; i < expected.getInProgress().size(); ++i) {
+			assertEquals(expected.getInProgress().get(i).getProduct().getId(), result.getInProgress().get(i).getProduct().getId());
+			assertEquals(expected.getInProgress().get(i).getConsumer().getId(), result.getInProgress().get(i).getConsumer().getId());
+			assertEquals(expected.getInProgress().get(i).getPrice(), result.getInProgress().get(i).getPrice());
+			assertEquals(expected.getInProgress().get(i).getState(), result.getInProgress().get(i).getState());
 		}
 	}
 	
@@ -513,4 +528,42 @@ public class ProductTransactionServiceTest {
 		assertEquals(ErrorCode.TRANSACTION_NOT_ACCEPTABLE, e.getErrorCode());		
 	}
 
+	
+	// getProductTransactionForProduct
+	@Test
+	@DisplayName("해당 상품과 구매자의 거래 내역을 조회한다.")
+	public void getProductTransactionForProduct() {
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(100l)
+				.remaining(100l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(product);
+		Account consumer = consumerList.get(0);
+		ProductTransaction productTransaction = ProductTransaction.builder()
+													.product(product)
+													.consumer(consumer)
+													.price(product.getPrice())
+													.state(ProductTransactionState.RESERVED)
+													.build();
+		productTransaction = productTransactionRepository.save(productTransaction);
+		
+		// when
+		ProductTransaction saved = productTransactionService.getProductTransactionForProduct(productTransaction.getId(), consumer.getId());
+		
+		// then
+		ProductTransaction expected = ProductTransaction.builder()
+												.product(product)
+												.consumer(consumer)
+												.price(product.getPrice())
+												.state(ProductTransactionState.RESERVED)
+												.build();
+		assertEquals(expected.getProduct().getId(), saved.getProduct().getId());
+		assertEquals(expected.getState(), saved.getState());			
+		assertEquals(expected.getConsumer().getId(), saved.getConsumer().getId());
+	}
 }
