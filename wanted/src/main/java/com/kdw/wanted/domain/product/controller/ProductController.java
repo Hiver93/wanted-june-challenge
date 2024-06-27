@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
-import com.kdw.wanted.domain.product.dto.request.ProductReqeustDto;
-import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
-import com.kdw.wanted.domain.product.dto.response.ProductResponseDto;
-import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
+import com.kdw.wanted.domain.product.dto.controller.request.ProductReqeustDto;
+import com.kdw.wanted.domain.product.dto.controller.request.ProductTransactionRequestDto;
+import com.kdw.wanted.domain.product.dto.controller.response.ProductResponseDto;
+import com.kdw.wanted.domain.product.dto.controller.response.ProductTransactionResponseDto;
+import com.kdw.wanted.domain.product.dto.controller.response.ProductTransactionResponseDto.Transactions;
 import com.kdw.wanted.domain.product.service.ProductService;
 import com.kdw.wanted.domain.product.service.ProductTransactionService;
 import com.kdw.wanted.global.auth.service.JwtService;
@@ -68,12 +69,10 @@ public class ProductController {
 	// 제품 상세와 해당 제품과의 거래 내역(소비자)
 	@GetMapping("/{productId}")
 	public ResponseEntity<BaseResponseBody> getProduct(@PathVariable("productId") Long productId, HttpServletRequest httpRequest){
-		System.out.println(productId);
 		Product product = productService.getProduct(productId);
-		System.out.println(product);
 		UUID consumerId = null; 
 		ProductTransaction productTransaction = null;
-		if(httpRequest.getAttribute("Authorization") != null) {
+		if(httpRequest.getHeader("Authorization") != null) {
 			consumerId = jwtService.getId(httpRequest); 
 			productTransaction = productTransactionService.getProductTransactionForProduct(productId, consumerId);
 		}
@@ -101,9 +100,10 @@ public class ProductController {
 	@GetMapping("/transactions")
 	public ResponseEntity<BaseResponseBody> getTransactions(HttpServletRequest httpRequest){
 		return new ResponseEntity<BaseResponseBody>(
-				BaseResponseBody.of(productTransactionService.getTransactions(jwtService.getId(httpRequest))
-															.stream().map(
-																	transaction->ProductTransactionResponseDto.Element.fromEntity(transaction)),
+				BaseResponseBody.of(ProductTransactionResponseDto.Transactions
+											.fromServiceDto(
+													productTransactionService.getTransactions(jwtService.getId(httpRequest))
+											),															
 				"success"),
 				HttpStatus.OK
 				);
