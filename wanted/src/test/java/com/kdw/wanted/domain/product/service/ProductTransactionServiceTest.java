@@ -48,10 +48,11 @@ public class ProductTransactionServiceTest {
 	List<Account> accountList;
 	Account provider;
 	List<Account> consumerList;
+	static int consumerIdx = 0;
 	
 	@BeforeEach
 	public void init() {
-		for(int i = 0; i < 101; ++i) {
+		for(int i = 0; i < 10; ++i) {
 			accountRepository.save(Account.builder()
 									.id(UUID.randomUUID())
 									.username("account"+i)
@@ -112,6 +113,38 @@ public class ProductTransactionServiceTest {
 	}
 	
 	@Test
+	@DisplayName("마지막 상품에 대한 예약이 수행되면 상품의 상태를 Reserved로 변경한다.")
+	public void makeTransactionProductStateToReserved(){
+		
+		// given
+		Product product = Product.builder()
+				.account(provider)
+				.name("상품")
+				.price(1000l)
+				.quantity(1l)
+				.remaining(1l)
+				.state(ProductState.SALE)
+				.build();
+		product = productRepository.save(
+							product
+				);
+		Account consumer = consumerList.get(0);
+		
+		// when
+		String result = productTransactionService.makeTransaction(product.getId(), consumer.getId());
+		
+		// then		
+		assertEquals("success", result);
+		ProductTransaction saved = productTransactionRepository.findAll().get(0);
+		Product modifiedProduct = productRepository.findById(product.getId()).get(); 
+		Product expected = Product.builder()
+									.state(ProductState.RESERVED)
+									.build();
+		
+		assertEquals(expected.getState(), modifiedProduct.getState());
+	}
+	
+	@Test
 	@DisplayName("판매자가 거래요청을 신청하면 UNAUTHORIZED_ACCOUNT 예외 발생")
 	public void makeTransactionUnauthorizedAccount() {
 		
@@ -162,6 +195,37 @@ public class ProductTransactionServiceTest {
 	}
 	
 	@Test
+	@DisplayName("이미 거래가 진행중인 구매자라면 TRANSACTION_CONFLICT 예외 발생")
+	public void makeTransactionTransactionConflict() {
+		// given
+			Product product = Product.builder()
+					.account(provider)
+					.name("상품")
+					.price(1000l)
+					.quantity(100l)
+					.remaining(0l)
+					.state(ProductState.SALE)
+					.build();
+			product = productRepository.save(
+								product
+					);
+			Long productId = product.getId();
+			Account consumer = consumerList.get(0);
+			productTransactionRepository.save(
+								ProductTransaction.builder()
+									.product(product)
+									.consumer(consumer)
+									.build()
+					);
+			
+			// when
+			// then
+			ProductTransactionException e = assertThrows(
+					ProductTransactionException.class, ()->productTransactionService.makeTransaction(productId, consumer.getId()));
+			assertEquals(ErrorCode.TRANSACTION_CONPLICT, e.getErrorCode());
+	}
+	
+	@Test
 	@DisplayName("다중 스레드 환경에서 product의 남은 개수가 정상적으로 줄어든다.")
 	public void makeTransactionWithLock() throws InterruptedException {
 		// given
@@ -177,26 +241,31 @@ public class ProductTransactionServiceTest {
 							product
 				);
 		Long productId = product.getId();
-		UUID consumerId = consumerList.get(0).getId();
 		
 		//when
 		ExecutorService executorService = Executors.newFixedThreadPool(10);
 		CountDownLatch countDown = new CountDownLatch(100);
-		for(int i = 0; i< 100;++i)
-		executorService.execute(()->
-			new Runnable() {
-					@Override
-					public void run() {
-						try {
-							productTransactionService.makeTransaction(productId, consumerId);
+		for(int i = 0; i< 100;++i) {
+			executorService.execute(()->
+				new Runnable() {
+						@Override
+						public void run() {
+							try {
+								Account consumer = accountRepository.save(Account.builder()
+										.id(UUID.randomUUID())
+										.username("account"+UUID.randomUUID())
+										.password("1234")
+										.build());
+								productTransactionService.makeTransaction(productId, consumer.getId());
+							}
+							finally {
+								countDown.countDown();
+							}
+							
 						}
-						finally {
-						countDown.countDown();
-						}
-						
-					}
-				}.run()
-			);
+					}.run()
+				);
+		}
 		countDown.await();
 		
 		// then
