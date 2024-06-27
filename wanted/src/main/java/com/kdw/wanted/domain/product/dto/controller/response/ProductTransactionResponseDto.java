@@ -1,4 +1,4 @@
-package com.kdw.wanted.domain.product.dto.response;
+package com.kdw.wanted.domain.product.dto.controller.response;
 
 import java.time.LocalDateTime;
 

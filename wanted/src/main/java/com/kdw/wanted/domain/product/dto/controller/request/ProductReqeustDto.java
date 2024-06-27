@@ -1,4 +1,4 @@
-package com.kdw.wanted.domain.product.dto.request;
+package com.kdw.wanted.domain.product.dto.controller.request;
 
 import java.util.UUID;
 

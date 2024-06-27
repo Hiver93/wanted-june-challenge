@@ -3,16 +3,14 @@ package com.kdw.wanted.domain.product.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
 import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
-import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto;
-import com.kdw.wanted.domain.product.dto.request.ProductTransactionRequestDto.Confirm;
-import com.kdw.wanted.domain.product.dto.response.ProductTransactionResponseDto;
+import com.kdw.wanted.domain.product.dto.service.response.ProductTransactionServiceResponse;
+import com.kdw.wanted.domain.product.dto.service.response.ProductTransactionServiceResponse.Transactions;
 import com.kdw.wanted.domain.product.repository.ProductRepository;
 import com.kdw.wanted.domain.product.repository.ProductTransactionRepository;
 import com.kdw.wanted.global.auth.service.JwtService;
@@ -58,14 +56,22 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 
 	@Override
 	@Transactional
-	public List<ProductTransaction> getTransactions(UUID accountId) {
+	public ProductTransactionServiceResponse.Transactions getTransactions(UUID accountId) {
 		List<ProductTransaction> productTransactions = productTransactionRepository.findAllByConsumerId(accountId);
-		productRepository.findAllByAccountId(accountId).stream().forEach(
-					p-> p.getProductTransactions().stream().forEach(
-								t -> {productTransactions.add(t);}
-							)
-				);
-		return productTransactions;
+		productRepository.findAllByAccountId(accountId).stream()
+														.flatMap(product->product.getProductTransactions().stream())
+														.forEach(transaction->productTransactions.add(transaction));
+		
+		Transactions transactions = new Transactions();
+		productTransactions.stream().forEach(transaction->{
+			if(transaction.getState() == ProductTransactionState.COMPLETE) {
+				transactions.getComplete().add(transaction);
+			}else {
+				transactions.getInProgress().add(transaction);
+			}
+		});
+		
+		return transactions;
 	}
 	
 
