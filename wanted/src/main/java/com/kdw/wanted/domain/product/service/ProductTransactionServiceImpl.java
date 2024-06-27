@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
+import com.kdw.wanted.domain.product.domain.enums.ProductState;
 import com.kdw.wanted.domain.product.domain.enums.ProductTransactionState;
 import com.kdw.wanted.domain.product.dto.service.response.ProductTransactionServiceResponse;
 import com.kdw.wanted.domain.product.dto.service.response.ProductTransactionServiceResponse.Transactions;
@@ -109,6 +110,9 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
 		}
 		productTransaction.setState(ProductTransactionState.COMPLETE);
+		if(productTransactionRepository.countByProductIdAndState(productTransaction.getProduct().getId(), ProductTransactionState.COMPLETE) == productTransaction.getProduct().getQuantity()) {
+			productTransaction.getProduct().stateToComplete();
+		}
 		
 		return "success";
 	}

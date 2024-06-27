@@ -18,6 +18,6 @@ import jakarta.persistence.LockModeType;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 	public List<Product> findAllByAccountId(UUID accountId);
 	
-	 @Lock(LockModeType.PESSIMISTIC_WRITE)    
+	@Lock(LockModeType.PESSIMISTIC_WRITE)    
     Optional<Product> findWithPessimisticLockById(Long id);
 }
