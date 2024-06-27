@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.kdw.wanted.domain.product.domain.Product;
 import com.kdw.wanted.domain.product.domain.ProductTransaction;
 
 import jakarta.persistence.Column;
@@ -49,10 +50,10 @@ public class Account implements UserDetails {
 				.toList();
 	}
 	
-	@OneToMany(mappedBy = "provider")
-    private List<ProductTransaction> providerTransactions = new ArrayList<>();
-
-	@OneToMany(mappedBy = "consumer")
-    private List<ProductTransaction> consumerTransactions = new ArrayList<>();
+//	@OneToMany(mappedBy="account")
+//	List<Product> products = new ArrayList<>();
+//
+//	@OneToMany(mappedBy = "consumer")
+//    private List<ProductTransaction> consumerTransactions = new ArrayList<>();
 	
 }

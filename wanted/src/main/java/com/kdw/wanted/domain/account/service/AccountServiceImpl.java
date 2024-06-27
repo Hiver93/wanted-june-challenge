@@ -12,7 +12,10 @@ import com.kdw.wanted.domain.account.domain.Account;
 import com.kdw.wanted.domain.account.repository.AccountRepository;
 import com.kdw.wanted.global.auth.dto.JwtToken;
 import com.kdw.wanted.global.auth.service.JwtTokenProvider;
+import com.kdw.wanted.global.error.ErrorCode;
+import com.kdw.wanted.global.error.exception.AccountException;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,9 +27,10 @@ public class AccountServiceImpl implements AccountService{
 	private final PasswordEncoder passwordEncoder;
 	
 	@Override
+	@Transactional
 	public String signup(Account account) {
 		if(accountRepository.existsByUsername(account.getUsername())) {
-			throw new RuntimeException();
+			throw new AccountException(ErrorCode.USER_NAME_CONPLICT);
 		}
 		account.setId(UUID.randomUUID());
 		account.getRoles().add("USER");

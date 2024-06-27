@@ -12,7 +12,6 @@ import com.kdw.wanted.domain.account.dto.request.SignupRequestDto;
 import com.kdw.wanted.domain.account.service.AccountService;
 import com.kdw.wanted.global.util.BaseResponseBody;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
