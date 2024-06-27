@@ -36,8 +36,12 @@ public class ProductTransactionServiceImpl implements ProductTransactionService{
 	@Transactional
 	public String makeTransaction(Long productId, UUID consumerId) {
 		Product product = productRepository.findWithPessimisticLockById(productId).orElseThrow(()->new ProductException(ErrorCode.PRODUCT_NOT_FOUND));
+		
 		if(product.getAccount().getId().equals(consumerId)){
 			throw new AccountException(ErrorCode.UNAUTHORIZED_ACCOUNT);
+		}
+		if(productTransactionRepository.existsByProductIdAndConsumerId(productId, consumerId)) {
+			throw new ProductTransactionException(ErrorCode.TRANSACTION_CONPLICT);
 		}
 		if(product.getRemaining() < 1) {
 			throw new ProductTransactionException(ErrorCode.TRANSACTION_NOT_ACCEPTABLE);
