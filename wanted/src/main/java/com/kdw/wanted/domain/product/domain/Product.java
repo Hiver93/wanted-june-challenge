@@ -69,12 +69,19 @@ public class Product {
 	@Builder.Default
 	Integer version = 0;
 	
+	@OneToMany(mappedBy = "product", targetEntity = ProductTransaction.class)
+    private List<ProductTransaction> productTransactions = new ArrayList<>();
+	
+
 	
 	public void decreaseRemaining() {
 		this.remaining -= 1;
 	}
 	
-	
-	@OneToMany(mappedBy = "product", targetEntity = ProductTransaction.class)
-    private List<ProductTransaction> productTransactions = new ArrayList<>();
+	public void stateToReserved() {
+		this.state = state.RESERVED;
+	}
+	public void stateToComplete() {
+		this.state = state.COMPLETE;
+	}
 }
