@@ -20,7 +20,6 @@ import com.kdw.wanted.domain.product.dto.controller.request.ProductReqeustDto;
 import com.kdw.wanted.domain.product.dto.controller.request.ProductTransactionRequestDto;
 import com.kdw.wanted.domain.product.dto.controller.response.ProductResponseDto;
 import com.kdw.wanted.domain.product.dto.controller.response.ProductTransactionResponseDto;
-import com.kdw.wanted.domain.product.dto.controller.response.ProductTransactionResponseDto.Transactions;
 import com.kdw.wanted.domain.product.service.ProductService;
 import com.kdw.wanted.domain.product.service.ProductTransactionService;
 import com.kdw.wanted.global.auth.service.JwtService;
